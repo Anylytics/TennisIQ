@@ -63,7 +63,11 @@ def scoreConverter(currentScore):
         return [40,50]
     else:
         assert('Score is Busted')
-        
+pointLookup = {'S': 1, 
+            'A': 1, 
+            'R': 0, 
+            'D': 0}
+            
 """
 Data Structure:
     0: Date
@@ -87,37 +91,59 @@ for idz, row in enumerate(matchData[1:]):
 
     players = [player1Ids[idz], player2Ids[idz]]
     winnerID = players[int(row[6])-1]
-    scoreLine = scoreLine.replace('.', ';')
-    gameLines = scoreLine.split(';')
-    server = 0
-    skippedTb = 0
-    for idy, game in enumerate(gameLines):
-        if '/' in game:
-            skippedTb += 1
-            server+=1
-            continue
-        gameMatrix = np.zeros((len(game),numColumns), np.int)
-        gameMatrix[:,0] = dates[idz].strftime('%Y%m%d')
-        gameMatrix[:,1] = tourIds[idz]
-    
-        gameMatrix[:,2] = players[server%2]
-        gameMatrix[:,3] = players[(server+1)%2]
-        gameMatrix[:,7] = idy + skippedTb
-        gameMatrix[:,9] = winnerID
-        pointLookup = {'S': 1, 
-        'A': 1, 
-        'R': 0, 
-        'D': 0}
-    
-        currentScore = np.zeros((1,2), np.int)
-        for idx,point in enumerate(game):
-            gameMatrix[idx,4] = pointLookup[point]
-            gameMatrix[idx,5:7] = scoreConverter(currentScore)
-            #Increment Score
-            currentScore[0,1-pointLookup[point]]+=1
-        
-        server += 1
-        matchesTemp.append(gameMatrix)
+    setLines = scoreLine.split('.')
+    for idset, setLine in enumerate(setLines):
+        #scoreLine = scoreLine.replace('.', ';')
+        gameLines = setLine.split(';')
+        server = 0
+        for idy, game in enumerate(gameLines):
+            if '/' in game:
+                old_server = server
+                tbpoints = game.split('/')
+                currentScore = np.ones((1,2), np.int) * 100
+                for tb_point in tbpoints:
+                    gameMatrix = np.zeros((len(tb_point),numColumns), np.int)
+                    gameMatrix[:,0] = dates[idz].strftime('%Y%m%d')
+                    gameMatrix[:,1] = tourIds[idz]
+                
+                    gameMatrix[:,2] = players[server%2]
+                    gameMatrix[:,3] = players[(server+1)%2]
+                    gameMatrix[:,7] = idy
+                    gameMatrix[:,8] = idset
+                    gameMatrix[:,9] = winnerID
+                    for idx, point in enumerate(tb_point):
+                        gameMatrix[idx,4] = pointLookup[point]
+                        gameMatrix[idx,5:7] = currentScore
+                        currentScore[0,1-pointLookup[point]] += 1
+                    
+                    server += 1
+                    matchesTemp.append(gameMatrix)
+                    currentScore = np.fliplr(currentScore)
+                
+                server = old_server + 1
+            else:
+                gameMatrix = np.zeros((len(game),numColumns), np.int)
+                gameMatrix[:,0] = dates[idz].strftime('%Y%m%d')
+                gameMatrix[:,1] = tourIds[idz]
+            
+                gameMatrix[:,2] = players[server%2]
+                gameMatrix[:,3] = players[(server+1)%2]
+                gameMatrix[:,7] = idy
+                gameMatrix[:,8] = idset
+                gameMatrix[:,9] = winnerID
+                
+            
+                currentScore = np.zeros((1,2), np.int)
+                for idx,point in enumerate(game):
+                    gameMatrix[idx,4] = pointLookup[point]
+                    gameMatrix[idx,5:7] = scoreConverter(currentScore)
+                    #Increment Score
+                    currentScore[0,1-pointLookup[point]]+=1
+                
+                server += 1
+                
+                matchesTemp.append(gameMatrix)
+                
 matchMatrix = np.concatenate(matchesTemp)
 
 

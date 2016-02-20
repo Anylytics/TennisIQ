@@ -36,7 +36,7 @@ np.savetxt("Processed/players.csv", allPlayers, delimiter=",", fmt='%s')
 
 #Step 2, create a lookup table for all tournaments
 touraments = list(set([row[1] for row in matchData[1:]]))
-np.savetxt("Processed/tournaments.csv", allPlayers, delimiter=",", fmt='%s')
+np.savetxt("Processed/tournaments.csv", touraments, delimiter=",", fmt='%s')
 
 tourIds = map(lambda x: touraments.index(x[1]), matchData[1:])
 player1Ids = map(lambda x: allPlayers.index(x[4]), matchData[1:])
@@ -63,13 +63,30 @@ def scoreConverter(currentScore):
         return [40,50]
     else:
         assert('Score is Busted')
-matchMatrix = np.empty((0,8), np.int)
+        
+"""
+Data Structure:
+    0: Date
+    1: Tournament ID
+    2: Server ID
+    3: Returner ID
+    4: WonPoint?
+    5: Game Score 1
+    6: Game Score 2
+    7: Number of Games Played
+    8: Number of Sets Played
+    9: WinnerID
+"""     
+numColumns = 10   
+matchMatrix = np.empty((0,numColumns), np.int)
+matchesTemp = []
 for idz, row in enumerate(matchData[1:]):
     print idz
     scoreLine = row[7]
     
 
     players = [player1Ids[idz], player2Ids[idz]]
+    winnerID = players[int(row[6])-1]
     scoreLine = scoreLine.replace('.', ';')
     gameLines = scoreLine.split(';')
     server = 0
@@ -77,14 +94,16 @@ for idz, row in enumerate(matchData[1:]):
     for idy, game in enumerate(gameLines):
         if '/' in game:
             skippedTb += 1
+            server+=1
             continue
-        gameMatrix = np.zeros((len(game),8), np.int)
+        gameMatrix = np.zeros((len(game),numColumns), np.int)
         gameMatrix[:,0] = dates[idz].strftime('%Y%m%d')
         gameMatrix[:,1] = tourIds[idz]
     
         gameMatrix[:,2] = players[server%2]
         gameMatrix[:,3] = players[(server+1)%2]
         gameMatrix[:,7] = idy + skippedTb
+        gameMatrix[:,9] = winnerID
         pointLookup = {'S': 1, 
         'A': 1, 
         'R': 0, 
@@ -98,9 +117,10 @@ for idz, row in enumerate(matchData[1:]):
             currentScore[0,1-pointLookup[point]]+=1
         
         server += 1
-        matchMatrix = np.concatenate((matchMatrix,gameMatrix))
+        matchesTemp.append(gameMatrix)
+matchMatrix = np.concatenate(matchesTemp)
 
 
-np.savetxt("Processed/points.csv", matchMatrix, delimiter=",", fmt='%s', header="Date, TournamentID, ServerID, ReturnerID, WonPt, GameScore1, GameScore2, NumGamesPlayed")
+np.savetxt("Processed/points.csv", matchMatrix, delimiter=",", fmt='%s', header="Date, TournamentID, ServerID, ReturnerID, WonPt, GameScore1, GameScore2, NumGamesPlayed, numSetsPlayed, MatchWinnerID")
 
     

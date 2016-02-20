@@ -25,8 +25,49 @@ save players, replace
 use points, clear
 sort returnerid
 merge n:1 returnerid using players
+drop _merge
+rename name returnername
+save points, replace 
+
+cd "~/Anylytics//TennisIQ"
+
+
+import delimited "/Users/NitinKrishnan/Anylytics/TennisIQ/Processed/tournaments.csv", encoding(ISO-8859-1)clear
+gen tournamentid = _n - 1
+rename v1 tournamentname 
+sort tournamentid
+save "Analysis_Nitin/tournaments.dta", replace
+
+cd "~/Anylytics//TennisIQ/Analysis_Nitin"
+
+
+use atpmatchesAll, clear
+keep tourney_date winner_name winner_rank
+rename winner_name name
+rename winner_rank rank
+save rankKey, replace
+
+use atpmatchesAll, clear
+keep tourney_date loser_name loser_rank
+rename loser_name name
+rename loser_rank rank
+
+append using rankKey
+tostring tourney_date, gen(tS)
+egen datename = concat(tS name)
+drop tS
+duplicates drop datename, force
+drop datename 
+rename name servername
+rename tourney_date date
+sort date servername
+save rankKey, replace
+
 
 *Merge player data here if needed 
+use points, clear
+sort date servername
+merge n:1 date servername using rankKey
 
 
 *Making game score into string
@@ -38,7 +79,26 @@ bys serverid_gamescore: egen servePointProbability = mean(wonpt)
 bys returnerid_gamescore: egen returnPointProbability = mean(1-wonpt)
 
 
-
-
-
 save pointsMoreVariables, replace
+
+use pointsMoreVariables, clear
+
+keep servername gamescore servePointProbability serverid_gamescore
+duplicates drop serverid_gamescore, force
+drop serverid_gamescore
+export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/serviceWinProbabilities.csv", replace
+
+use pointsMoreVariables, clear
+
+keep returnername gamescore servePointProbability returnerid_gamescore
+duplicates drop returnerid_gamescore, force
+drop returnerid_gamescore
+export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/returnWinProbabilities.csv", replace
+
+ 
+
+
+
+
+
+

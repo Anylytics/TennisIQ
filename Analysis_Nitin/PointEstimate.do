@@ -67,7 +67,25 @@ save rankKey, replace
 *Merge player data here if needed 
 use points, clear
 sort date servername
-merge n:1 date servername using rankKey
+nearmrg servername date using rankKey, nearvar(date)
+rename rank serverrank
+drop _merge
+save points, replace
+
+use rankKey, clear
+rename servername returnername
+sort date returnername
+save rankKey, replace
+
+use points, clear
+sort date returnername
+nearmrg date returnername using rankKey, nearvar(date)
+rename rank returnerrank
+drop _merge
+save points, replace
+
+
+
 
 
 *Making game score into string
@@ -78,6 +96,12 @@ egen returnerid_gamescore = concat(returnerid gamescore), punct(",")
 bys serverid_gamescore: egen servePointProbability = mean(wonpt)
 bys returnerid_gamescore: egen returnPointProbability = mean(1-wonpt)
 
+*Against top 20 players
+*foreach x in 100 124 83 205 259 43 38 192 225 53 120 295 13 264 171 287 80 178 101 315{
+*}
+
+keep if returnerid == 100 & 124 & 83 & 205 & 259 & 43 & 38 & 192 & 225 & 53 & 120 & 295 & 13 & 264 & 171 & 287 & 80 & 178 & 101 & 315
+
 
 save pointsMoreVariables, replace
 
@@ -86,13 +110,26 @@ use pointsMoreVariables, clear
 keep servername gamescore servePointProbability serverid_gamescore
 duplicates drop serverid_gamescore, force
 drop serverid_gamescore
+split gamescore, p("-") destring
+replace gamescore1 = ceil(gamescore1/15)
+replace gamescore2 = ceil(gamescore2/15)
+rename gamescore1 playerScore
+rename gamescore2 opponentScore
+
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/serviceWinProbabilities.csv", replace
+
 
 use pointsMoreVariables, clear
 
-keep returnername gamescore servePointProbability returnerid_gamescore
+keep returnername gamescore returnPointProbability returnerid_gamescore
 duplicates drop returnerid_gamescore, force
 drop returnerid_gamescore
+split gamescore, p("-") destring
+replace gamescore1 = ceil(gamescore1/15)
+replace gamescore2 = ceil(gamescore2/15)
+rename gamescore1 opponentScore
+rename gamescore2  playerScore
+
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/returnWinProbabilities.csv", replace
 
  

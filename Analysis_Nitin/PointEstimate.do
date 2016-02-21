@@ -100,7 +100,6 @@ bys returnerid_gamescore: egen returnPointProbability = mean(1-wonpt)
 *foreach x in 100 124 83 205 259 43 38 192 225 53 120 295 13 264 171 287 80 178 101 315{
 *}
 
-keep if returnerid == 100 & 124 & 83 & 205 & 259 & 43 & 38 & 192 & 225 & 53 & 120 & 295 & 13 & 264 & 171 & 287 & 80 & 178 & 101 & 315
 
 
 save pointsMoreVariables, replace
@@ -132,7 +131,56 @@ rename gamescore2  playerScore
 
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/returnWinProbabilities.csv", replace
 
- 
+
+*Top 20 - serving
+use pointsmoreVariables, clear
+egen OK = anymatch(returnerid), values(100 124 83 205 259 43 38 192 225 53 120 295 13 264 171 287 80 178 101 315)
+keep if OK
+drop OK
+*keep if returnerid == 100 | 124 | 83 | 205 | 259 | 43 | 38 | 192 | 225 | 53 | 120 | 295 | 13 | 264 | 171 | 287 | 80 | 178 | 101 | 315
+
+bys serverid_gamescore: egen servePointProbability_top20 = mean(wonpt)
+bys returnerid_gamescore: egen returnPointProbability_top20 = mean(1-wonpt)
+
+
+keep servername gamescore servePointProbability_top20 serverid_gamescore
+duplicates drop serverid_gamescore, force
+drop serverid_gamescore
+split gamescore, p("-") destring
+replace gamescore1 = ceil(gamescore1/15)
+replace gamescore2 = ceil(gamescore2/15)
+rename gamescore1 playerScore
+rename gamescore2 opponentScore
+sort servername gamescore
+
+export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/serviceWinProbabilities_Top20.csv", replace
+
+
+*Top 20 - returning
+use pointsmoreVariables, clear
+egen OK = anymatch(serverid), values(100 124 83 205 259 43 38 192 225 53 120 295 13 264 171 287 80 178 101 315)
+keep if OK
+drop OK
+*keep if returnerid == 100 | 124 | 83 | 205 | 259 | 43 | 38 | 192 | 225 | 53 | 120 | 295 | 13 | 264 | 171 | 287 | 80 | 178 | 101 | 315
+
+bys serverid_gamescore: egen servePointProbability_top20 = mean(wonpt)
+bys returnerid_gamescore: egen returnPointProbability_top20 = mean(1-wonpt)
+
+
+keep returnername gamescore returnPointProbability_top20 returnerid_gamescore
+duplicates drop returnerid_gamescore, force
+drop returnerid_gamescore
+split gamescore, p("-") destring
+replace gamescore1 = ceil(gamescore1/15)
+replace gamescore2 = ceil(gamescore2/15)
+rename gamescore1 opponentScore
+rename gamescore2 playerscore
+sort returnername gamescore
+
+export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/returnWinProbabilities_Top20.csv", replace
+
+
+
 
 
 

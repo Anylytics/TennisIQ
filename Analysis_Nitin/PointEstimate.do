@@ -42,13 +42,13 @@ cd "~/Anylytics//TennisIQ/Analysis_Nitin"
 
 
 use atpmatchesAll, clear
-keep tourney_date winner_name winner_rank
+keep tourney_name tourney_date winner_name winner_rank
 rename winner_name name
 rename winner_rank rank
 save rankKey, replace
 
 use atpmatchesAll, clear
-keep tourney_date loser_name loser_rank
+keep tourney_name tourney_date loser_name loser_rank
 rename loser_name name
 rename loser_rank rank
 
@@ -61,28 +61,62 @@ drop datename
 rename name servername
 rename tourney_date date
 sort date servername
+
+tostring date, gen(dateString)
+gen yearmonth = substr(dateString,1,6)
+sort servername yearmonth
 save rankKey, replace
+
+use rankKey, clear
+duplicates drop servername, force
+keep servername
+save uniquenames, replace 
+
+use rankKey, clear
+duplicates drop yearmonth, force
+keep yearmonth
+cross using uniquenames 
+sort servername yearmonth
+merge servername yearmonth using rankKey 
+drop tourney_name - dateString _merge
+sort servername yearmonth
+by servername: gen c = _n
+by server: ipolate rank c, gen(rank_interp) 
+replace rank = round(rank_interp)
+sort servername yearmonth
+drop rank_interp
+sort servername yearmonth
+save rankKey, replace
+
+
 
 
 *Merge player data here if needed 
 use points, clear
-sort date servername
-nearmrg servername date using rankKey, nearvar(date)
+tostring date, gen(yearmonth)
+replace yearmonth = substr(yearmonth,1,6)
+sort servername yearmonth
+merge servername yearmonth using rankKey
+keep if _merge == 1 | _merge == 3
 rename rank serverrank
-drop _merge
+drop c _merge
 save points, replace
 
 use rankKey, clear
 rename servername returnername
-sort date returnername
+sort returnername yearmonth
 save rankKey, replace
 
 use points, clear
-sort date returnername
-nearmrg date returnername using rankKey, nearvar(date)
+sort returnername yearmonth
+merge returnername yearmonth using rankKey
+keep if _merge == 1 | _merge == 3
 rename rank returnerrank
-drop _merge
+drop c
 save points, replace
+
+
+
 
 
 
@@ -173,7 +207,8 @@ export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/s
 
 *Top 20 - returning
 use pointsmoreVariables, clear
-egen OK = anymatch(serverid), values(100 124 83 205 259 43 38 192 225 53 120 295 13 264 171 287 80 178 101 315)
+*egen OK = anymatch(serverid), values(100 124 83 205 259 43 38 192 225 53 120 295 13 264 171 287 80 178 101 315)
+egen OK = anymatch(serverid), values(100 124 83 205 259)
 keep if OK
 drop OK
 *keep if returnerid == 100 | 124 | 83 | 205 | 259 | 43 | 38 | 192 | 225 | 53 | 120 | 295 | 13 | 264 | 171 | 287 | 80 | 178 | 101 | 315
@@ -184,7 +219,7 @@ bys returnerid_gamescore: egen returnPointProbability_top20 = mean(1-wonpt)
 bys returnerid_gamescore: egen returnPointFreq_top20 = sum(n)
 
 
-keep returnername gamescore returnPointProbability_top20 returnPointFreq_top20 returnerid_gamescore
+keep returnername gamescore returnPointProbability_top20 returnPointFreq_top20 returnerid_gamescore returnerid
 duplicates drop returnerid_gamescore, force
 drop returnerid_gamescore
 split gamescore, p("-") destring
@@ -195,6 +230,7 @@ rename gamescore2 playerscore
 sort returnername gamescore
 
 save returnwinProbabilities_Top20, replace
+
 
 
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/returnWinProbabilities_Top20.csv", replace

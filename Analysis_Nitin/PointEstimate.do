@@ -93,8 +93,12 @@ egen gamescore = concat(gamescore1  gamescore2), punct("-")
 egen serverid_gamescore = concat(serverid gamescore),punct(",")
 egen returnerid_gamescore = concat(returnerid gamescore), punct(",")
 
+gen n = 1
+
 bys serverid_gamescore: egen servePointProbability = mean(wonpt)
+bys serverid_gamescore: egen servePointFreq = sum(n)
 bys returnerid_gamescore: egen returnPointProbability = mean(1-wonpt)
+bys returnerid_gamescore: egen returnPointFreq = sum(n)
 
 *Against top 20 players
 *foreach x in 100 124 83 205 259 43 38 192 225 53 120 295 13 264 171 287 80 178 101 315{
@@ -106,7 +110,7 @@ save pointsMoreVariables, replace
 
 use pointsMoreVariables, clear
 
-keep servername gamescore servePointProbability serverid_gamescore
+keep serverid gamescore servePointProbability serverid_gamescore servePointFreq
 duplicates drop serverid_gamescore, force
 drop serverid_gamescore
 split gamescore, p("-") destring
@@ -115,12 +119,14 @@ replace gamescore2 = ceil(gamescore2/15)
 rename gamescore1 playerScore
 rename gamescore2 opponentScore
 
+save serviceWinProbabilites, replace 
+
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/serviceWinProbabilities.csv", replace
 
 
 use pointsMoreVariables, clear
 
-keep returnername gamescore returnPointProbability returnerid_gamescore
+keep returnername gamescore returnPointProbability returnerid_gamescore returnPointFreq
 duplicates drop returnerid_gamescore, force
 drop returnerid_gamescore
 split gamescore, p("-") destring
@@ -128,6 +134,9 @@ replace gamescore1 = ceil(gamescore1/15)
 replace gamescore2 = ceil(gamescore2/15)
 rename gamescore1 opponentScore
 rename gamescore2  playerScore
+
+save returnwinProbabilities, replace
+
 
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/returnWinProbabilities.csv", replace
 
@@ -140,10 +149,13 @@ drop OK
 *keep if returnerid == 100 | 124 | 83 | 205 | 259 | 43 | 38 | 192 | 225 | 53 | 120 | 295 | 13 | 264 | 171 | 287 | 80 | 178 | 101 | 315
 
 bys serverid_gamescore: egen servePointProbability_top20 = mean(wonpt)
+bys serverid_gamescore: egen servePointFreq_top20 = sum(n)
 bys returnerid_gamescore: egen returnPointProbability_top20 = mean(1-wonpt)
+bys returnerid_gamescore: egen returnPointFreq_top20 = sum(n)
 
 
-keep servername gamescore servePointProbability_top20 serverid_gamescore
+
+keep servername gamescore servePointProbability_top20 servePointFreq_top20 serverid_gamescore
 duplicates drop serverid_gamescore, force
 drop serverid_gamescore
 split gamescore, p("-") destring
@@ -152,6 +164,9 @@ replace gamescore2 = ceil(gamescore2/15)
 rename gamescore1 playerScore
 rename gamescore2 opponentScore
 sort servername gamescore
+
+save serviceWinProbabilites_Top20, replace 
+
 
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/serviceWinProbabilities_Top20.csv", replace
 
@@ -164,10 +179,12 @@ drop OK
 *keep if returnerid == 100 | 124 | 83 | 205 | 259 | 43 | 38 | 192 | 225 | 53 | 120 | 295 | 13 | 264 | 171 | 287 | 80 | 178 | 101 | 315
 
 bys serverid_gamescore: egen servePointProbability_top20 = mean(wonpt)
+bys serverid_gamescore: egen servePointFreq_top20 = sum(n)
 bys returnerid_gamescore: egen returnPointProbability_top20 = mean(1-wonpt)
+bys returnerid_gamescore: egen returnPointFreq_top20 = sum(n)
 
 
-keep returnername gamescore returnPointProbability_top20 returnerid_gamescore
+keep returnername gamescore returnPointProbability_top20 returnPointFreq_top20 returnerid_gamescore
 duplicates drop returnerid_gamescore, force
 drop returnerid_gamescore
 split gamescore, p("-") destring
@@ -176,6 +193,9 @@ replace gamescore2 = ceil(gamescore2/15)
 rename gamescore1 opponentScore
 rename gamescore2 playerscore
 sort returnername gamescore
+
+save returnwinProbabilities_Top20, replace
+
 
 export delimited using "/Users/NitinKrishnan/Anylytics/TennisIQ/Analysis_Nitin/returnWinProbabilities_Top20.csv", replace
 

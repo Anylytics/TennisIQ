@@ -22,7 +22,7 @@ pp = pprint.PrettyPrinter(indent=4)
 matchData = []
 
 # Read The Data 
-with open('Data/pbp_matches_atp_main_current.csv', 'rb') as csvfile:
+with open('Data/pbp_matches_atp_main_archive.csv', 'rb') as csvfile:
     csvreader = csv.reader(csvfile)
     for row in csvreader:
         matchData.append(row)

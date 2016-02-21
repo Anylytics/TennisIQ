@@ -22,9 +22,14 @@ pp = pprint.PrettyPrinter(indent=4)
 matchData = []
 
 # Read The Data 
+with open('Data/pbp_matches_atp_main_current.csv', 'rb') as csvfile:
+    csvreader = csv.reader(csvfile)
+    for row in csvreader:
+        matchData.append(row)
 
 with open('Data/pbp_matches_atp_main_current.csv', 'rb') as csvfile:
     csvreader = csv.reader(csvfile)
+    next(csvreader, None)
     for row in csvreader:
         matchData.append(row)
 
@@ -85,7 +90,8 @@ numColumns = 10
 matchMatrix = np.empty((0,numColumns), np.int)
 matchesTemp = []
 for idz, row in enumerate(matchData[1:]):
-    print idz
+    if idz%10 == 0:
+        print "ID: %d of %d (%f Percent)" % (idz, len(matchData[1:]), float(idz)/len(matchData[1:])*100)
     scoreLine = row[7]
     
 
@@ -147,6 +153,6 @@ for idz, row in enumerate(matchData[1:]):
 matchMatrix = np.concatenate(matchesTemp)
 
 
-np.savetxt("Processed/points.csv", matchMatrix, delimiter=",", fmt='%s', header="Date, TournamentID, ServerID, ReturnerID, WonPt, GameScore1, GameScore2, NumGamesPlayed, numSetsPlayed, MatchWinnerID")
+np.savetxt("Processed/points_all.csv", matchMatrix, delimiter=",", fmt='%s', header="Date, TournamentID, ServerID, ReturnerID, WonPt, GameScore1, GameScore2, NumGamesPlayed, numSetsPlayed, MatchWinnerID")
 
     

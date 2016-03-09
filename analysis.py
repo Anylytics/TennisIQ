@@ -22,6 +22,30 @@ Data Structure:
 import numpy as np
 import matplotlib.pyplot as plt
 
+tennisScores = [0, 15, 30, 40, 50]
+
+#Generate point distribution spreads
+pointsWon = matchMatrix[matchMatrix[:,4]==1]
+#scoreCount = np.array(map(lambda x:int(str(x[0])+str(x[1])), pointsWon[:,5:7]))
+scoreCountWin = np.array(map(lambda x: x[0]*1000+x[1], pointsWon[:,5:7]))
+scoreCountAll = np.array(map(lambda x: x[0]*1000+x[1], matchMatrix[:,5:7]))
+#Exclude TieBreaks
+#scoreCount = scoreCount[scoreCount < 100100]
+#Transform the score double into a score single
+scoreCountWin = np.bincount(scoreCountWin)
+scoreCountAll = np.bincount(scoreCountAll)
+#Plot the number of points won at each score situation
+scoreDistVals = np.zeros((5,5))
+for idx, score1 in enumerate(tennisScores):
+    for idy,score2 in enumerate(tennisScores):
+        if scoreCountAll[score1*1000+score2] > 0:
+            scoreDistVals[idx,idy] = float(scoreCountWin[score1*1000+score2])/scoreCountAll[score1*1000+score2]
+        else:
+            scoreDistVals[idx,idy] = np.nan
+plt.imshow(scoreDistVals, interpolation='none', cmap='summer')
+plt.colorbar()
+
+
 #if 'matchMatrix' not in locals():
 #    #Load the data back in
 #    matchMatrix = np.genfromtxt('Processed/points.csv', delimiter=',', skip_header=1, dtype=np.int8)

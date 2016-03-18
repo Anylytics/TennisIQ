@@ -147,6 +147,8 @@ for idz, row in enumerate(matchData[1:]):
                     gameMatrix[idx,5:7] = scoreConverter(currentScore)
                     #Increment Score
                     currentScore[0,1-pointLookup[point]]+=1
+                    
+                                        
                 
                 server += 1
                 

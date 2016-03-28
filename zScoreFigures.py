@@ -48,7 +48,7 @@ rows = [x for x in returnerPointData if x[1] == 'Novak Djokovic' and x[3] == '5'
 
 names = ['Novak Djokovic', 'Andy Murray', 'Roger Federer', 'Stanislas Wawrinka', 'Rafael Nadal', 'Kei Nishikori']
 #names = ['Novak Djokovic']
-topN = '5'
+topN = '20'
 
 for name in names:
 
@@ -57,29 +57,34 @@ for name in names:
     returningMatrix = generateScoreDistMatrix(returnerPointData, name, topN)
     
     
-    fig, axes = plt.subplots(nrows=1, ncols=2)    
+    fig, axes = plt.subplots(nrows=1, ncols=2, sharex=False, sharey = False, figsize=(8, 8), dpi=180)    
     labels = ['Love', '15', '30', '40', 'Adv']
-    axes[0].imshow(servingMatrix, interpolation='none', cmap='YlGnBu', vmin=0, vmax=2)
-    axes[0].set_xlabel('Server Score (%s)' % (name))
-    axes[0].set_ylabel('Returner Score (Top %s Players)' % (topN))
+    axes[0].imshow(servingMatrix, interpolation='nearest', cmap='YlGnBu', vmin=0, vmax=2, origin='lower')
+    #axes[0].set_xlabel('Server Score')
+    axes[0].set_ylabel('Returner Score')
     axes[0].set_xticks([0,1,2,3,4])
     axes[0].set_yticks([0,1,2,3,4])
     axes[0].set_xticklabels(labels)
     axes[0].set_yticklabels(labels)
+    axes[0].set_title('%s Serving' % (name))
         
-    im = axes[1].imshow(returningMatrix, interpolation='none', cmap='YlGnBu', vmin=0, vmax=2)
-    axes[1].set_xlabel('Server Score (Top %s Players)' % (topN))
-    axes[1].set_ylabel('Returner Score (%s)' % (name))
+    im = axes[1].imshow(returningMatrix, interpolation='nearest', cmap='YlGnBu', vmin=0, vmax=2, origin='lower')
+    #axes[1].set_xlabel('Server Score')
+    #axes[1].set_ylabel('Returner Score')
     axes[1].set_xticks([0,1,2,3,4])
-    axes[1].set_yticks([0,1,2,3,4])
+    axes[1].set_yticks([])
     axes[1].set_xticklabels(labels)
-    axes[1].set_yticklabels(labels)
-    
+    #xes[1].set_yticklabels(labels)
+    axes[1].set_title('%s Returning' % (name))
+    fig.text(0.45, 0.04, 'Server Score', ha='center')
+    plt.tight_layout()  
     fig.subplots_adjust(right=0.8)
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-    fig.colorbar(im, cax=cbar_ax)    
-    
+    cbar = fig.colorbar(im, cax=cbar_ax, ticks=[0, 1, 2])
+    cbar.set_ticklabels(['Worst', 'Average', 'Best'])
+  
+
     plt.show()
     plt.draw()
     
-    plt.savefig('Figures/%s_topN_%s.png' % (name, topN))
+    plt.savefig('Figures/%s_topN_%s.png' % (name, topN),figsize=(12, 12), dpi=180)

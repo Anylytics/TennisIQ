@@ -48,12 +48,12 @@ for mode in modes:
             max_zscore = max(zscores)
             min_zscore = abs(min(zscores))
             zscore_norm = ((zscores+min_zscore)/(max_zscore+min_zscore))*2
-            tmp = map(lambda x,y: pointData[x].append(y), rows, zscore_norm)
+            tmp = map(lambda x,y,z: pointData[x].extend([y,z]), rows, zscore_norm, zscores)
             
     tmpCount = 0
     for idx,row in enumerate(pointData):
         if len(row)<8:
-            pointData[idx].append(-1)
+            pointData[idx].extend([-1,' '])
             tmpCount += 1
             
     print "%d rows of %d not statistically significant" % (tmpCount, len(pointData))

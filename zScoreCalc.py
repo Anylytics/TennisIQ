@@ -56,7 +56,7 @@ for mode in modes:
             pointData[idx].extend([-1,' '])
             tmpCount += 1
             
-    print "%d rows of %d not statistically significant" % (tmpCount, len(pointData))
+    print "%d rows of %d not statistically significant (%f Percent)" % (tmpCount, len(pointData), tmpCount/float(len(pointData))*100)
        
     prunedPointData = []
     for row in pointData:

@@ -25,12 +25,13 @@ def generateScoreDistMatrix(pointData, name, topN):
     for idx, score1 in enumerate(tennisScores):
         for idy,score2 in enumerate(tennisScores):
             theScore = [x for x in rows if x[2]==str(score1)+'-'+str(score2)]
-            if len(theScore) == 1 and len(theScore[0]) >= 8 and theScore[0][-1]>=0:
+            if len(theScore) == 1 and len(theScore[0]) >= 8 and theScore[0][-2]>=0:
                 theScore = theScore[0]
-                scoreDistVals[idx,idy] = theScore[-1]
+                scoreDistVals[idx,idy] = theScore[-2]
             else:
                 scoreDistVals[idx,idy] = np.nan
     return scoreDistVals
+
 
 
 
@@ -39,7 +40,7 @@ with open(fname, 'rb') as handle:
     serverPointData = pickle.load(handle)
 
 
-fname = "Processed/zscore_headmap_Returner.pickle"
+#fname = "Processed/zscore_headmap_Returner.pickle"
 with open(fname, 'rb') as handle:
     returnerPointData = pickle.load(handle)
 

@@ -88,7 +88,7 @@ Data Structure:
     8: Number of Sets Played
     9: WinnerID
 """     
-numColumns = 10   
+numColumns = 11  
 matchMatrix = np.empty((0,numColumns), np.int)
 matchesTemp = []
 for idz, row in enumerate(matchData[1:]):
@@ -100,11 +100,11 @@ for idz, row in enumerate(matchData[1:]):
     players = [player1Ids[idz], player2Ids[idz]]
     winnerID = players[int(row[6])-1]
     setLines = scoreLine.split('.')
+    server = 0
     for idset, setLine in enumerate(setLines):
         #scoreLine = scoreLine.replace('.', ';')
         gameLines = setLine.split(';')
-        server = 0
-        for idy, game in enumerate(gameLines):
+        for idy, game in enumerate(gameLines):            
             if '/' in game:
                 old_server = server
                 tbpoints = game.split('/')
@@ -127,8 +127,10 @@ for idz, row in enumerate(matchData[1:]):
                     server += 1
                     matchesTemp.append(gameMatrix)
                     currentScore = np.fliplr(currentScore)
-                
+                    
                 server = old_server + 1
+            elif '' == game:
+                continue
             else:
                 gameMatrix = np.zeros((len(game),numColumns), np.int)
                 gameMatrix[:,0] = dates[idz].strftime('%Y%m%d')
@@ -139,6 +141,7 @@ for idz, row in enumerate(matchData[1:]):
                 gameMatrix[:,7] = idy
                 gameMatrix[:,8] = idset
                 gameMatrix[:,9] = winnerID
+                gameMatrix[:,10] = 1 if game[-1] == 'S' else 0
                 
             
                 currentScore = np.zeros((1,2), np.int)
